@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Correos UAP</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" th:href="@{/}">Correos UAP</a>
+        <nav class="nav">
+            <a class="active" th:href="@{/}">Inicio</a>
+            <a th:href="@{/contacts}">Contactos</a>
+            <a th:href="@{/emails}">Enviar</a>
+            <a th:href="@{/campaigns}">Campanas</a>
+        </nav>
+    </div>
+</header>
+<main class="page">
+    <div class="page-title">
+        <div>
+            <h1>Panel de correos</h1>
+            <p class="muted">Gestion de contactos, envios individuales y campanas masivas.</p>
+        </div>
+        <a class="button" th:href="@{/emails}">Nuevo envio</a>
+    </div>
+
+    <section class="grid three">
+        <div class="stat">
+            <span class="muted">Contactos totales</span>
+            <strong th:text="${totalContacts}">0</strong>
+        </div>
+        <div class="stat">
+            <span class="muted">Contactos activos</span>
+            <strong th:text="${activeContacts}">0</strong>
+        </div>
+        <div class="stat">
+            <span class="muted">Campanas recientes</span>
+            <strong th:text="${#lists.size(campaigns)}">0</strong>
+        </div>
+    </section>
+
+    <section class="grid two" style="margin-top:18px">
+        <div class="panel">
+            <h2>Importar base</h2>
+            <p class="help">Sube CSV, XLS o XLSX con columnas `correo`, `nombre` y `apellido`.</p>
+            <a class="button secondary" th:href="@{/contacts}">Ir a contactos</a>
+        </div>
+        <div class="panel">
+            <h2>Enviar correos</h2>
+            <p class="help">Usa variables en el cuerpo: `{{nombre}}`, `{{apellido}}`, `{{correoUap}}`, `{{correoPersonal}}` y `{{nombreCompleto}}`.</p>
+            <a class="button secondary" th:href="@{/emails}">Redactar correo</a>
+        </div>
+    </section>
+
+    <section style="margin-top:18px">
+        <h2>Ultimas campanas</h2>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(campaigns)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Asunto</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Enviados</th>
+                    <th>Fallidos</th>
+                    <th>Fecha</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="campaign : ${campaigns}">
+                    <td><a th:href="@{/campaigns/{id}(id=${campaign.id})}" th:text="${campaign.id}">1</a></td>
+                    <td th:text="${campaign.subject}">Asunto</td>
+                    <td><span class="badge" th:classappend="${campaign.status.name() == 'SENT'} ? ' ok' : (${campaign.status.name() == 'PARTIAL'} ? ' warn' : ' fail')" th:text="${campaign.status.label}">Enviado</span></td>
+                    <td th:text="${campaign.totalRecipients}">0</td>
+                    <td th:text="${campaign.successfulDeliveries}">0</td>
+                    <td th:text="${campaign.failedDeliveries}">0</td>
+                    <td th:text="${#temporals.format(campaign.createdAt, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel empty" th:if="${#lists.isEmpty(campaigns)}">Aun no hay campanas registradas.</div>
+    </section>
+</main>
+</body>
+</html>

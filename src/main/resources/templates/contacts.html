@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contactos - Correos UAP</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" th:href="@{/}">Correos UAP</a>
+        <nav class="nav">
+            <a th:href="@{/}">Inicio</a>
+            <a class="active" th:href="@{/contacts}">Contactos</a>
+            <a th:href="@{/emails}">Enviar</a>
+            <a th:href="@{/campaigns}">Campanas</a>
+        </nav>
+    </div>
+</header>
+<main class="page">
+    <div class="page-title">
+        <div>
+            <h1>Contactos</h1>
+            <p class="muted"><span th:text="${activeContacts}">0</span> activos; <span th:text="${credentialRecipients}">0</span> pueden recibir credenciales en su correo personal.</p>
+        </div>
+        <form th:action="@{/contacts/send-credentials}" method="post">
+            <button type="submit">Enviar credenciales</button>
+        </form>
+    </div>
+
+    <div class="alert success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert error" th:if="${error}" th:text="${error}"></div>
+    <div class="alert error" th:if="${importErrors != null && !#lists.isEmpty(importErrors)}">
+        <div th:each="message : ${importErrors}" th:text="${message}">Error</div>
+    </div>
+
+    <section class="grid two">
+        <div class="panel">
+            <h2>Subir archivo CSV o Excel</h2>
+            <form th:action="@{/contacts/import}" method="post" enctype="multipart/form-data" class="form-grid">
+                <div class="field">
+                    <label for="file">Archivo</label>
+                    <input id="file" name="file" type="file" accept=".csv,.xls,.xlsx" required>
+                    <div class="help">Encabezados aceptados: correo, nombre, apellido. Si no hay correo personal, se genera el correo UAP con nombre y apellido.</div>
+                </div>
+                <div class="actions">
+                    <button type="submit">Importar contactos</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Agregar persona</h2>
+            <form th:action="@{/contacts}" method="post" class="form-grid">
+                <div class="field">
+                    <label for="firstName">Nombre</label>
+                    <input id="firstName" name="firstName" type="text">
+                </div>
+                <div class="field">
+                    <label for="lastName">Apellido</label>
+                    <input id="lastName" name="lastName" type="text">
+                </div>
+                <div class="field">
+                    <label for="email">Correo personal</label>
+                    <input id="email" name="email" type="email">
+                    <div class="help">El correo UAP se genera como apellido.nombre@uap.edu.bo.</div>
+                </div>
+                <div class="actions">
+                    <button type="submit">Guardar persona</button>
+                    <button class="secondary" type="submit" formaction="/contacts/generate-uap">Regenerar correos UAP</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section style="margin-top:18px">
+        <h2>Base de contactos</h2>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(contacts)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Correo UAP</th>
+                    <th>Clave</th>
+                    <th>Credenciales</th>
+                    <th>Correo personal</th>
+                    <th>Origen</th>
+                    <th>Estado</th>
+                    <th>Creado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="contact : ${contacts}">
+                    <td th:text="${contact.displayName}">Nombre</td>
+                    <td th:text="${contact.institutionalEmail} ?: '-'">apellido.nombre@uap.edu.bo</td>
+                    <td th:text="${contact.institutionalPassword} ?: '-'">Clave</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${contact.credentialsSentAt != null} ? ' ok' : ' warn'"
+                              th:text="${contact.credentialsSentAt != null} ? 'Enviado' : 'Pendiente'">Pendiente</span>
+                        <div class="help" th:if="${contact.credentialsSentAt != null}"
+                             th:text="${#temporals.format(contact.credentialsSentAt, 'dd/MM/yyyy HH:mm')}">fecha</div>
+                    </td>
+                    <td th:text="${contact.email} ?: '-'">correo@ejemplo.com</td>
+                    <td th:text="${contact.source}">csv</td>
+                    <td><span class="badge" th:classappend="${contact.active} ? ' ok' : ' fail'" th:text="${contact.active} ? 'Activo' : 'Inactivo'">Activo</span></td>
+                    <td th:text="${#temporals.format(contact.createdAt, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                    <td>
+                        <form th:action="@{/contacts/{id}/send-credentials(id=${contact.id})}" method="post" style="margin-bottom:8px">
+                            <button class="secondary" type="submit"
+                                    th:disabled="${contact.email == null || contact.institutionalEmail == null}">
+                                Enviar credenciales
+                            </button>
+                        </form>
+                        <form th:action="@{/contacts/{id}/toggle(id=${contact.id})}" method="post">
+                            <button class="warning" type="submit" th:text="${contact.active} ? 'Desactivar' : 'Activar'">Cambiar</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel empty" th:if="${#lists.isEmpty(contacts)}">No hay contactos cargados.</div>
+    </section>
+</main>
+</body>
+</html>

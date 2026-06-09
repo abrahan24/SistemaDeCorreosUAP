@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Campanas - Correos UAP</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" th:href="@{/}">Correos UAP</a>
+        <nav class="nav">
+            <a th:href="@{/}">Inicio</a>
+            <a th:href="@{/contacts}">Contactos</a>
+            <a th:href="@{/emails}">Enviar</a>
+            <a class="active" th:href="@{/campaigns}">Campanas</a>
+        </nav>
+    </div>
+</header>
+<main class="page">
+    <div class="page-title">
+        <div>
+            <h1>Campanas</h1>
+            <p class="muted">Historial de envios y resultado por campana.</p>
+        </div>
+        <a class="button" th:href="@{/emails}">Nuevo envio</a>
+    </div>
+
+    <div class="table-wrap" th:if="${!#lists.isEmpty(campaigns)}">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Asunto</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Enviados</th>
+                <th>Fallidos</th>
+                <th>Fecha</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="campaign : ${campaigns}">
+                <td><a th:href="@{/campaigns/{id}(id=${campaign.id})}" th:text="${campaign.id}">1</a></td>
+                <td th:text="${campaign.subject}">Asunto</td>
+                <td><span class="badge" th:classappend="${campaign.status.name() == 'SENT'} ? ' ok' : (${campaign.status.name() == 'PARTIAL'} ? ' warn' : ' fail')" th:text="${campaign.status.label}">Enviado</span></td>
+                <td th:text="${campaign.totalRecipients}">0</td>
+                <td th:text="${campaign.successfulDeliveries}">0</td>
+                <td th:text="${campaign.failedDeliveries}">0</td>
+                <td th:text="${#temporals.format(campaign.createdAt, 'dd/MM/yyyy HH:mm')}">fecha</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="panel empty" th:if="${#lists.isEmpty(campaigns)}">Aun no hay campanas registradas.</div>
+</main>
+</body>
+</html>

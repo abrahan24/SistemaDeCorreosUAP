@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Enviar - Correos UAP</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" th:href="@{/}">Correos UAP</a>
+        <nav class="nav">
+            <a th:href="@{/}">Inicio</a>
+            <a th:href="@{/contacts}">Contactos</a>
+            <a class="active" th:href="@{/emails}">Enviar</a>
+            <a th:href="@{/campaigns}">Campanas</a>
+        </nav>
+    </div>
+</header>
+<main class="page">
+    <div class="page-title">
+        <div>
+            <h1>Redactar y enviar</h1>
+            <p class="muted">Hay <span th:text="${activeContacts}">0</span> contactos activos; <span th:text="${activeInstitutionalContacts}">0</span> tienen correo UAP generado.</p>
+        </div>
+    </div>
+
+    <div class="alert success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="grid two">
+        <div class="panel">
+            <h2>Envio por persona</h2>
+            <form th:action="@{/emails/send-individual}" method="post" class="form-grid">
+                <div class="field">
+                    <label for="individual-email">Correo</label>
+                    <input id="individual-email" name="email" type="email" required>
+                </div>
+                <div class="field">
+                    <label for="individual-name">Nombre</label>
+                    <input id="individual-name" name="name" type="text">
+                </div>
+                <div class="field">
+                    <label for="individual-subject">Asunto</label>
+                    <input id="individual-subject" name="subject" type="text" required>
+                </div>
+                <div class="field">
+                    <label for="individual-body">Cuerpo HTML</label>
+                    <textarea id="individual-body" name="bodyHtml" required th:text="${defaultBody}"></textarea>
+                </div>
+                <button type="submit">Enviar a persona</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Envio masivo</h2>
+            <form th:action="@{/emails/send-massive}" method="post" class="form-grid">
+                <div class="field">
+                    <label for="mass-subject">Asunto</label>
+                    <input id="mass-subject" name="subject" type="text" required>
+                </div>
+                <div class="field">
+                    <label for="target">Enviar a</label>
+                    <select id="target" name="target">
+                        <option value="INSTITUTIONAL">Correos UAP generados (@uap.edu.bo)</option>
+                        <option value="PERSONAL">Correos personales importados</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="mass-body">Cuerpo HTML</label>
+                    <textarea id="mass-body" name="bodyHtml" required th:text="${defaultBody}"></textarea>
+                    <div class="help">Variables disponibles: {{nombre}}, {{apellido}}, {{correo}}, {{correoUap}}, {{correoPersonal}}, {{nombreCompleto}}.</div>
+                </div>
+                <button type="submit">Enviar a todos los activos</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

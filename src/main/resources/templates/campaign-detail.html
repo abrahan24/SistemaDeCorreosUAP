@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detalle de campana - Correos UAP</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" th:href="@{/}">Correos UAP</a>
+        <nav class="nav">
+            <a th:href="@{/}">Inicio</a>
+            <a th:href="@{/contacts}">Contactos</a>
+            <a th:href="@{/emails}">Enviar</a>
+            <a class="active" th:href="@{/campaigns}">Campanas</a>
+        </nav>
+    </div>
+</header>
+<main class="page">
+    <div class="page-title">
+        <div>
+            <h1 th:text="'Campana #' + ${campaign.id}">Campana #1</h1>
+            <p class="muted" th:text="${campaign.subject}">Asunto</p>
+        </div>
+        <a class="button secondary" th:href="@{/campaigns}">Volver</a>
+    </div>
+
+    <section class="grid three">
+        <div class="stat">
+            <span class="muted">Total</span>
+            <strong th:text="${campaign.totalRecipients}">0</strong>
+        </div>
+        <div class="stat">
+            <span class="muted">Enviados</span>
+            <strong th:text="${campaign.successfulDeliveries}">0</strong>
+        </div>
+        <div class="stat">
+            <span class="muted">Fallidos</span>
+            <strong th:text="${campaign.failedDeliveries}">0</strong>
+        </div>
+    </section>
+
+    <section style="margin-top:18px">
+        <h2>Destinatarios</h2>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(deliveries)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                    <th>Enviado</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="delivery : ${deliveries}">
+                    <td th:text="${delivery.recipientEmail}">correo@ejemplo.com</td>
+                    <td><span class="badge" th:classappend="${delivery.status.name() == 'SENT'} ? ' ok' : ' fail'" th:text="${delivery.status.label}">Enviado</span></td>
+                    <td th:text="${delivery.sentAt != null ? #temporals.format(delivery.sentAt, 'dd/MM/yyyy HH:mm') : '-'}">fecha</td>
+                    <td th:text="${delivery.errorMessage} ?: '-'">-</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel empty" th:if="${#lists.isEmpty(deliveries)}">No hay destinatarios registrados.</div>
+    </section>
+</main>
+</body>
+</html>
